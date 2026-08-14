@@ -33,6 +33,12 @@ from ovos_utils.log import LOG
 
 platform = "HiveMindGSMBridgeV0.1"
 
+# hivemind-bus-client >= 1.0.13a1 makes HiveMessageBusClient.connect()
+# block on the handshake; handshake_max_retries=None (the client's own
+# default) retries forever. Bound it here so a stalled/unreachable hub
+# (down, wrong password) fails fast instead of hanging the bridge.
+DEFAULT_HANDSHAKE_MAX_RETRIES = 10
+
 
 class HiveMindGSMBridge:
     """Bridge a physical GSM/USB modem's SMS to a HiveMind node."""
@@ -48,6 +54,7 @@ class HiveMindGSMBridge:
                  self_signed: bool = False,
                  lang: str = "en-us",
                  site_id: str = "gsm",
+                 handshake_max_retries: int = DEFAULT_HANDSHAKE_MAX_RETRIES,
                  *,
                  client: Optional[HiveMessageBusClient] = None,
                  modem=None):
@@ -62,6 +69,9 @@ class HiveMindGSMBridge:
         key, password, host, port, self_signed: HiveMind hub connection.
         lang: default utterance language tag.
         site_id: this bridge's HiveMind site id.
+        handshake_max_retries: bound on HiveMessageBusClient.connect()'s
+            handshake retries. A stalled/unreachable hub would otherwise
+            retry forever (the client's own default) and hang the bridge.
         client: pre-built HiveMessageBusClient (tests / advanced setups).
             NOTE: HiveMessageBusClient does NOT open a connection in
             __init__ -- call connect_hivemind() to connect.
@@ -76,6 +86,7 @@ class HiveMindGSMBridge:
         self.sim_pin = sim_pin
         self.lang = lang
         self.site_id = site_id
+        self.handshake_max_retries = handshake_max_retries
 
         self._modem = modem
 
@@ -107,7 +118,8 @@ class HiveMindGSMBridge:
         already starts and owns the reconnect worker thread. Never call
         ``run_forever()`` in addition to this.
         """
-        self.client.connect(site_id=self.site_id)
+        self.client.connect(site_id=self.site_id,
+                            handshake_max_retries=self.handshake_max_retries)
         self.client.on_mycroft("speak", self.handle_speak)
         self.client.on_mycroft("hive.complete_intent_failure",
                                self.handle_intent_failure)

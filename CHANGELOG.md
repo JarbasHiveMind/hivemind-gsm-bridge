@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.0.1a2](https://github.com/JarbasHiveMind/hivemind-gsm-bridge/tree/0.0.1a2) (2026-08-15)
+
+[Full Changelog](https://github.com/JarbasHiveMind/hivemind-gsm-bridge/compare/0.0.1a1...0.0.1a2)
+
+**Merged pull requests:**
+
+- fix: bound HiveMind connect\(\) handshake retries in the GSM bridge [\#3](https://github.com/JarbasHiveMind/hivemind-gsm-bridge/pull/3) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [0.0.1a1](https://github.com/JarbasHiveMind/hivemind-gsm-bridge/tree/0.0.1a1) (2026-08-15)
 
 [Full Changelog](https://github.com/JarbasHiveMind/hivemind-gsm-bridge/compare/253821f31a6d01b4240e54590590205568cca2e9...0.0.1a1)

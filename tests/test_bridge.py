@@ -54,11 +54,29 @@ def test_connect_hivemind_calls_connect_once_and_registers_handlers():
     bridge, fake_client, fake_modem = _make_bridge()
     bridge.connect_hivemind()
 
-    fake_client.connect.assert_called_once_with(site_id="gsm")
+    fake_client.connect.assert_called_once_with(
+        site_id="gsm", handshake_max_retries=10)
     fake_client.run_forever.assert_not_called()
     assert bridge._connected is True
     registered = {call.args[0] for call in fake_client.on_mycroft.call_args_list}
     assert registered == {"speak", "hive.complete_intent_failure"}
+
+
+def test_connect_hivemind_bounds_handshake_retries():
+    """connect() must never be called with unbounded handshake retries.
+
+    hivemind-bus-client's connect() blocks on the handshake and retries
+    forever when handshake_max_retries is None (its own default). A
+    stalled/unreachable hub would otherwise hang the bridge forever.
+    """
+    from hivemind_gsm_bridge import DEFAULT_HANDSHAKE_MAX_RETRIES
+
+    bridge, fake_client, fake_modem = _make_bridge()
+    bridge.connect_hivemind()
+
+    _, kwargs = fake_client.connect.call_args
+    assert kwargs.get("handshake_max_retries") is not None
+    assert kwargs["handshake_max_retries"] == DEFAULT_HANDSHAKE_MAX_RETRIES
 
 
 def test_inbound_sms_forwarded_to_hivemind_after_connect():

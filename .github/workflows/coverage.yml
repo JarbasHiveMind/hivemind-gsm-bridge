@@ -12,8 +12,10 @@ jobs:
     with:
       python_version: '3.11'
       coverage_source: 'hivemind_gsm_bridge'
-      # install the package's [test] extra (pytest); the coverage workflow's own
-      # 'install_extras' input means extra pip ARGUMENTS, not an extras name.
+      # install the package's [test] extra (pytest). The coverage workflow's
+      # own 'install_extras' input accepts a bare extras name as well: that is
+      # the first spelling its description gives, and raw pip arguments are
+      # only one of the forms it takes.
       test_extras: 'test'
-      test_path: 'tests/test_bridge.py'
+      test_path: 'tests'
       min_coverage: 0
